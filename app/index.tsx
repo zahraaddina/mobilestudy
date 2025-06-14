@@ -1,39 +1,95 @@
+import Komponen from "@/components/Komponen";
+import Task from "@/components/Task";
+import axios from "axios";
 import { useRouter } from "expo-router";
-import React from "react";
-import { View, StyleSheet, Button } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Button, StyleSheet, Text, TextInput, View, ScrollView, FlatList, Alert } from "react-native";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+
+type Task = {
+	id: number;
+	title: string;
+	description: string;
+};
 
 export default function Index() {
-  const router =useRouter();
+	const [tasks, setTasks] = useState<Task[]>([]);
+	const [loading, setLoading] = useState(true);
 
-  fetch("https://dummyjson.com/quotes#")
-    .then((res) => res.json())
-    .then(console.log); 
+	async function getTasks() {
+			const response = await axios.get(
+				"https://api-organiz.my.id/api/tasks",
+			);
+			setTasks(response.data);
+			setTimeout(() => {
+			setLoading(false);
+			}, 3000);
+		}
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.box}>
-                <View style={{ backgroundColor: "pink", height: 20, width: 20 }}></View>
-            </View>
-            <View style={styles.box}></View>
-            <View style={styles.box}></View>
-            <Button title="Go to Details" onPress={() => router.push("./kedua")}/>
-        </View>
-    );
+	useEffect(() => {
+		getTasks();
+	}, []);
+
+	async function deleteTask(id: number) {
+		await axios.delete(`https://api-organiz.my.id/api/tasks/${id}`),
+		await getTasks();
+	}
+
+	console.log(tasks);
+
+	function onDelete(id: number) {
+		Alert.alert("Hapus", "Apakah anda yakin ingin menghapus?", [
+			{
+				text: "Batal"
+			},
+			{
+				text: "Hapus", onPress: () => deleteTask(id),
+			}
+		]
+		);
+	}
+
+	if (loading) {
+		return (
+			<View style={styles.container}>
+				<Text style={{ fontSize: 30 }}>Loading</Text>
+				<ActivityIndicator size="large" color="#0000ff" />
+			</View>
+		);
+	}
+
+	return (
+		<View style={styles.container}>
+			<Komponen
+			/>
+
+			<Text style={{ fontSize: 30 }}>Tasks fsfssdfds</Text>
+			{/* <ScrollView>
+				{tasks.map((task) => (
+					<Task item = {task}/>
+				))}
+			</ScrollView> */}
+
+			<FlatList
+				data={tasks}
+				renderItem={({ item }) => (
+					<Task
+						task={item}
+						onDelete={() => onDelete(item.id)}
+					/>
+				)}
+			/>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "row",
-        // Gunakan margin untuk memberikan jarak antar elemen
-    },
-    box: {
-        backgroundColor: "red",
-        width: 100,
-        height: 100,
-        marginHorizontal: 5, // Memberikan jarak antar box
-    },
+	container: {
+		flex: 1,
+		backgroundColor: "#fff",
+		alignItems: "center",
+		justifyContent: "center",
+		gap: 10,
+	},
+	box: { backgroundColor: "red", height: 100, width: 100 },
 });
