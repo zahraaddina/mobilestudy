@@ -1,6 +1,6 @@
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 
 
@@ -10,6 +10,7 @@ export default function PostDetailPage() {
 
     const [task, setTask] = useState(); //untuk menyimpan data task yg diambil dari API
     const [isLoading, setLoading] = useState(true);
+
 
     useEffect(() => {
         async function getTask() {
@@ -24,15 +25,11 @@ export default function PostDetailPage() {
 
     }, []);
 
-    const handleSave = async () => { //mengirim data task yang sudah diedit ke API menggunakan metode PUT
-        try {
-            await axios.put(`https://api-organiz.my.id/api/tasks/${id}`, task);
-            console.log("Task updated successfully");
-        } catch (error) {
-            console.error("Error updating task:", error);
-        }
-    };
-    
+    async function saveTask () {
+        await axios.put(`https://api-organiz.my.id/api/tasks/${id}`, task);
+        router.push("/");
+    }
+
     console.log(task);
 
     if (isLoading) {
@@ -51,11 +48,10 @@ export default function PostDetailPage() {
             <TextInput //input untuk deskripsi task
                 style={styles.input}
                 value={task.description}
-                onChangeText={text => setTask({ ...task, description: text })}
+               onChangeText={text => setTask({ ...task, description: text })}
                 placeholder="Description"
-                multiline
             />
-            <Button title="Simpan" onPress={handleSave} />
+            <Button title="Simpan" onPress={saveTask} />
         </View>
 
         //matiin dulu

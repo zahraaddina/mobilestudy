@@ -15,6 +15,8 @@ type Task = {
 export default function Index() {
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
 
 	async function getTasks() {
 			const response = await axios.get(
@@ -30,6 +32,7 @@ export default function Index() {
 		getTasks();
 	}, []);
 
+	//delete
 	async function deleteTask(id: number) {
 		await axios.delete(`https://api-organiz.my.id/api/tasks/${id}`),
 		await getTasks();
@@ -58,12 +61,41 @@ export default function Index() {
 		);
 	}
 
+	//post 
+	async function saveTask() {
+		await axios.post("https://api-organiz.my.id/api/tasks", {
+			title,
+			description,
+		});
+		await getTasks();
+		//reset form setelah disimpan
+		setTitle("");
+		setDescription("");
+	}
+
 	return (
 		<View style={styles.container}>
 			<Komponen
 			/>
 
-			<Text style={{ fontSize: 30 }}>Tasks fsfssdfds</Text>
+			<Text style={{ fontSize: 30 }}>Form Tasks</Text>
+			<Text style={{ fontSize: 20 }}>Title</Text>
+			<TextInput
+				value={title}
+				onChangeText={(text) => setTitle(text)}
+				style={styles.textinput}
+				placeholder="Masukkan judul"
+			/>
+			<Text style={{ fontSize: 20 }}>Deskripsi</Text>
+			<TextInput
+				value={description}
+				onChangeText={(text) => setDescription(text)}
+				style={styles.textinput}
+				placeholder="Masukkan deskripsi"
+				/>
+
+			<Button title="Simpan" onPress={saveTask} />
+			<Text style={{ fontSize: 30 }}>Tasks</Text>
 			{/* <ScrollView>
 				{tasks.map((task) => (
 					<Task item = {task}/>
@@ -89,7 +121,20 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff",
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 10,
+		gap: 20,
 	},
-	box: { backgroundColor: "red", height: 100, width: 100 },
+	box: {
+		backgroundColor: "#eee",
+		height: 100,
+		width: 100,
+	},
+	textinput: {
+		borderWidth: 1,
+		borderColor: "#ccc",
+		borderRadius: 5,
+		padding: 5,
+		width: 550,
+		marginBottom: 15,
+		fontSize: 16,
+	},
 });
